@@ -1,7 +1,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { initUser } from "@/app/lib/init-user";
 
-const Home = async () => {
+const Dashboard = async () => {
   const user = await initUser();
   console.log(user);
   return (
@@ -11,4 +11,4 @@ const Home = async () => {
   );
 };
 
-export default Home;
+export default Dashboard;
