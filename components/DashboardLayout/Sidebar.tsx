@@ -79,7 +79,6 @@ const Sidebar = () => {
               </p>
               <input
                 onChange={(e) => {
-                  console.log(e.target.files);
                   setSelectedFile(e.target.files);
                 }}
                 ref={inputRef}
