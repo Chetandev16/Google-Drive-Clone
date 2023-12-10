@@ -26,30 +26,34 @@ model User {
 }
 
 model File {
-  id          String @id @default(uuid())
-  name        String
-  imageUrl    String @db.Text
-  uploadedURL String @unique
+  id              String   @id @default(uuid())
+  name            String
+  uploadedURL     String   @db.Text
+  inviteCode      String   @db.Text
+  sharedWithEmail String[] @db.Text
 
-  fileId   String
+  userId   String
   folderId String
-  user     User   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updtedAt  DateTime @updatedAt
 
-  @@index([fileId])
+  @@index([userId])
+  @@index([folderId])
 }
 
 model Folder {
   id   String @id @default(uuid())
   name String
 
-  folderId String
-  user     User   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  files  File[]
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updtedAt  DateTime @updatedAt
 
-  @@index([folderId])
+  @@index([userId])
 }

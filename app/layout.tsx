@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
 import ModalProvider from "@/components/provider/ModalProvider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -23,6 +24,7 @@ export default function RootLayout({
         <body className={inter.className}>
           {children}
           <ModalProvider />
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

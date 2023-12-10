@@ -1,8 +1,10 @@
 "use client";
 
-import { Clock4, HardDrive, Plus, Star, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import toast from "react-hot-toast";
+import axios from "axios";
 import { cn } from "@/lib/utils";
 
 import {
@@ -16,7 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Clock4, HardDrive, Plus, Star, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useModal } from "@/store/use-modal-store";
+import { upload_to_bucket } from "@/lib/supabaseUpload";
 
 const tabs = [
   {
@@ -46,10 +51,59 @@ const tabs = [
 ];
 
 const Sidebar = () => {
+  const supabaseURL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const supabaseKEY = process.env.NEXT_PUBLIC_SUPABASE_KEY || "";
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [activeTab, setActiveTab] = useState(1);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<null | FileList>(null);
+  const pathName = usePathname();
+  const isFolderRoute = pathName.includes("/folder/");
   const { onOpen } = useModal();
+
+  useEffect(() => {
+    setSupabase(createClient(supabaseURL, supabaseKEY));
+  }, [supabaseKEY, supabaseURL]);
+
+  useEffect(() => {
+    const uploadToDB = async (filePath: string) => {
+      try {
+        await axios.post("/api/file/upload", { filePath, isFolderRoute });
+        return new Promise((resolve) => {
+          resolve("done");
+        });
+      } catch (e) {
+        return new Promise((resolve) => {
+          resolve("failed");
+        });
+      }
+    };
+
+    if (selectedFile) {
+      const promise = () =>
+        new Promise((resolve, reject) => {
+          upload_to_bucket(selectedFile[0], supabase)
+            .then((response) => {
+              const filePath = response.fullPath;
+              uploadToDB(filePath).then((response) => {
+                if (response == "done") {
+                  resolve(response);
+                }
+                reject("failed");
+              });
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+
+      toast.promise(promise(), {
+        loading: "Uploading...",
+        success: "File uploaded successfully!",
+        error: "Error uploading file.",
+      });
+    }
+  }, [isFolderRoute, selectedFile, supabase]);
 
   const changeActiveTab = (id: number) => {
     setActiveTab(id);

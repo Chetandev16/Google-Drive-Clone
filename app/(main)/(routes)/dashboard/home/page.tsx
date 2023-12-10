@@ -1,4 +1,4 @@
-import { initUser } from "@/app/lib/init-user";
+import { initUser } from "@/lib/init-user";
 
 const Dashboard = async () => {
   return <div>Home</div>;
