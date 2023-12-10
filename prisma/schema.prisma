@@ -16,8 +16,10 @@ model User {
   name     String
   imageUrl String @db.Text
   email    String @db.Text
+  tier     String @default("FREE")
 
-  files File[]
+  files   File[]
+  folders Folder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -29,11 +31,25 @@ model File {
   imageUrl    String @db.Text
   uploadedURL String @unique
 
-  fileId String
-  user   User   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId   String
+  folderId String
+  user     User   @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updtedAt  DateTime @updatedAt
 
   @@index([fileId])
+}
+
+model Folder {
+  id   String @id @default(uuid())
+  name String
+
+  folderId String
+  user     User   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updtedAt  DateTime @updatedAt
+
+  @@index([folderId])
 }
