@@ -3,15 +3,15 @@ import React from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { usePathname } from "next/navigation";
+import axios from "axios";
 
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -24,6 +24,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useModal } from "@/store/use-modal-store";
+import { useLoaderStore } from "@/store/use-loader-store";
+import { useDataStore } from "@/store/use-data-store";
+import toast from "react-hot-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Folder name is required" }),
@@ -31,6 +34,8 @@ const formSchema = z.object({
 
 const NewFolderModal = () => {
   const { isOpen, onClose, type } = useModal();
+  const pathName = usePathname();
+  const { startTopLoader, stopTopLoader } = useLoaderStore();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,8 +44,39 @@ const NewFolderModal = () => {
   });
 
   const isModalOpen = isOpen && type === "newFolder";
+  const { refetchFilesFolder } = useDataStore();
+  const onSubmit = async (value: { name: string }) => {
+    const isFolderRoute = pathName.includes("/folder/");
+    try {
+      startTopLoader();
+      const folderName = value.name;
+      let parentId = undefined;
 
-  const onSubmit = () => {};
+      if (isFolderRoute) {
+        const paths = pathName.split("/");
+        parentId = paths?.[paths.length - 1];
+      }
+
+      const res = await axios.post("/api/folder/create", {
+        folderName,
+        parentId,
+      });
+
+      if (res.status == 200) {
+        toast.success(`Folder created: ${value.name}`);
+        refetchFilesFolder(new Date());
+        form.reset();
+        onClose();
+      } else {
+        toast.error("Error while creating folder!");
+      }
+
+      stopTopLoader();
+    } catch (err) {
+      console.log(err);
+      stopTopLoader();
+    }
+  };
   return (
     <Dialog open={isModalOpen} onOpenChange={() => onClose()}>
       <DialogContent className="bg-white text-black p-0 overflow-hidden">

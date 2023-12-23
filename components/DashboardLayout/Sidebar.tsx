@@ -22,6 +22,8 @@ import { Clock4, HardDrive, Plus, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/store/use-modal-store";
 import { upload_to_bucket } from "@/lib/supabaseUpload";
+import { useLoaderStore } from "@/store/use-loader-store";
+import { useDataStore } from "@/store/use-data-store";
 
 const tabs = [
   {
@@ -60,6 +62,8 @@ const Sidebar = () => {
   const pathName = usePathname();
   const isFolderRoute = pathName.includes("/folder/");
   const { onOpen } = useModal();
+  const { startTopLoader, stopTopLoader } = useLoaderStore();
+  const { refetchFilesFolder } = useDataStore();
 
   useEffect(() => {
     setSupabase(createClient(supabaseURL, supabaseKEY));
@@ -88,22 +92,33 @@ const Sidebar = () => {
               uploadToDB(filePath).then((response) => {
                 if (response == "done") {
                   resolve(response);
+                  stopTopLoader();
+                  refetchFilesFolder(new Date());
                 }
                 reject("failed");
               });
             })
             .catch((error) => {
               reject(error);
+              stopTopLoader();
             });
         });
 
+      startTopLoader();
       toast.promise(promise(), {
         loading: "Uploading...",
         success: "File uploaded successfully!",
         error: "Error uploading file.",
       });
     }
-  }, [isFolderRoute, selectedFile, supabase]);
+  }, [
+    isFolderRoute,
+    refetchFilesFolder,
+    selectedFile,
+    startTopLoader,
+    stopTopLoader,
+    supabase,
+  ]);
 
   const changeActiveTab = (id: number) => {
     setActiveTab(id);

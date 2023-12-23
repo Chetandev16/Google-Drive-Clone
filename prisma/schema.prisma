@@ -38,22 +38,25 @@ model File {
   folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-  updtedAt  DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([folderId])
 }
 
 model Folder {
-  id   String @id @default(uuid())
-  name String
+  id       String  @id @default(uuid())
+  name     String
+  files    File[]
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId String? // New field to represent the parent folder
 
-  files  File[]
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Folder?  @relation("ChildFolders", fields: [parentId], references: [id])
+  folders Folder[] @relation("ChildFolders") // To represent the child folders
 
   createdAt DateTime @default(now())
-  updtedAt  DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }
