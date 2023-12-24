@@ -27,5 +27,7 @@ export const delete_from_bucket = async (
 ) => {
   const filePath = `folder/${fileName}`;
   const { error } = await supabase.storage.from("gdrive").remove([filePath]);
-  console.log(error);
+  if (error) {
+    console.error("Error deleting file:", error.message);
+  }
 };

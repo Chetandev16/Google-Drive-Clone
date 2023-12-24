@@ -40,6 +40,7 @@ export async function POST(req: Request) {
         uploadedURL: `${process.env.FILE_URL}${filePath}`,
         inviteCode: uuidv4(),
         sharedWithEmail: [],
+        startedBy: [],
       },
     });
 

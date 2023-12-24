@@ -31,6 +31,7 @@ model File {
   uploadedURL     String   @db.Text
   inviteCode      String   @db.Text
   sharedWithEmail String[] @db.Text
+  startedBy       String[] @db.Text
 
   userId   String
   folderId String

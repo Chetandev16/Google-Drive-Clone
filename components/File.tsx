@@ -1,9 +1,12 @@
 "use client";
 
-import { FileImage } from "lucide-react";
+import { FileArchive, FileImage, PlaySquare } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import Options from "./Options";
+import Options from "@/components/Options";
+import { useModal } from "@/store/use-modal-store";
+import { Play } from "lucide-react";
+import { identifyContentType } from "@/lib/getFileType";
 
 interface Props {
   id: Number;
@@ -12,12 +15,53 @@ interface Props {
   layout: string;
 }
 
+const FileIcon = {
+  image: <FileImage className="h-5 w-5" color="#D93025" strokeWidth={2} />,
+  video: <PlaySquare className="h-5 w-5" color="#D93025" strokeWidth={2} />,
+  other: <FileArchive className="h-5 w-5" color="#D93025" strokeWidth={2} />,
+};
+
 const FileViewer: React.FC<Props> = ({ id, name, url, layout }) => {
+  const getPreivewMedia = () => {
+    const type = identifyContentType(url);
+
+    if (type == "image") {
+      return (
+        <Image
+          src={`${url}`}
+          width={1080}
+          height={1920}
+          alt=""
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      );
+    } else if (type == "video") {
+      return (
+        <div className="h-full w-full relative">
+          <video className="h-full w-full object-cover" src={`${url}`} />
+          <Play
+            color="#ffffff"
+            className="h-5 w-5 absolute top-[50%] left-[45%]"
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="h-full w-full flex flex-col justify-center items-center gap-5">
+          <FileArchive color="black" className="h-10 w-10" />
+          <p className="w-full p-2 truncate text-center">{name}</p>
+        </div>
+      );
+    }
+  };
+
+  const { onOpen } = useModal();
   if (layout == "grid") {
     return (
       <div className="max-w-xs mx-auto cursor-pointer hover:bg-[#E1E5EA] bg-[#EDF2FC]  rounded-md overflow-hidden shadow-md">
         <div className="p-4 flex justify-start items-center gap-1 relative">
-          <FileImage className="h-5 w-5" color="#D93025" strokeWidth={2} />
+          {FileIcon[identifyContentType(url)]}
           <h1 className="text-[#5F6368] text-sm font-medium w-[75%] truncate">
             {name}
           </h1>
@@ -26,15 +70,13 @@ const FileViewer: React.FC<Props> = ({ id, name, url, layout }) => {
             <Options name={name} id={id} type="File" />
           </div>
         </div>
-        <div className="w-full h-[200px] p-1">
-          <Image
-            src={`${url}`}
-            width={1080}
-            height={1920}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+        <div
+          onClick={() =>
+            onOpen("fileViewer", { fileType: "img", fileUrl: url, name: name })
+          }
+          className="w-full h-[200px] p-1"
+        >
+          {getPreivewMedia()}
         </div>
       </div>
     );
@@ -44,11 +86,21 @@ const FileViewer: React.FC<Props> = ({ id, name, url, layout }) => {
     <div className="w-full">
       <Separator />
       <div
-        onClick={() => window.open(`${url}`, "_blank")}
-        className="cursor-pointer flex p-3 hover:bg-[#E1E5EA] mt-2 rounded-sm justify-start items-center gap-3"
+        onClick={() =>
+          onOpen("fileViewer", { fileType: "img", fileUrl: url, name: name })
+        }
+        className="cursor-pointer flex p-3 hover:bg-[#E1E5EA] mt-2 rounded-sm justify-between items-center gap-3"
       >
-        <FileImage className="h-5 w-5" color="#D93025" strokeWidth={2} />
-        <h1 className="text-[#5F6368] text-sm font-medium truncate">{name}</h1>
+        <div className="flex items-center gap-2">
+          {FileIcon[identifyContentType(url)]}
+          <h1 className="text-[#5F6368] text-sm font-medium truncate">
+            {name}
+          </h1>
+        </div>
+
+        <div onClick={(e) => e.stopPropagation()} className="">
+          <Options name={name} id={id} type="File" />
+        </div>
       </div>
     </div>
   );

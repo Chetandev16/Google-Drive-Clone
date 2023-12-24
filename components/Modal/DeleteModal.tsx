@@ -30,6 +30,8 @@ export const DeleteModal = () => {
   if (!data) return;
   const { name, deleteType, id } = data;
 
+  if (!name || !deleteType || !id) return null;
+
   const isModalOpen = isOpen && type === "delete";
 
   const deleteContent = async () => {

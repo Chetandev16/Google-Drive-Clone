@@ -35,12 +35,14 @@ const Options: React.FC<Props> = ({ type, name, id }) => {
               Delete
             </p>
           </div>
-          <div>
-            <p className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md">
-              <Star className="h-4 w-4 text-slate-600" />
-              Star
-            </p>
-          </div>
+          {type == "File" && (
+            <div>
+              <p className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md">
+                <Star className="h-4 w-4 text-slate-600" />
+                Star
+              </p>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>

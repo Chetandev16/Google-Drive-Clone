@@ -2,6 +2,7 @@
 import React, { useState, useEffect, Fragment } from "react";
 import NewFolderModal from "@/components/Modal/NewFolderModal";
 import { DeleteModal } from "@/components/Modal/DeleteModal";
+import FileViewerModal from "@/components/Modal/FileViewerModal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -13,6 +14,7 @@ const ModalProvider = () => {
     <Fragment>
       <NewFolderModal />
       <DeleteModal />
+      <FileViewerModal />
     </Fragment>
   );
 };
