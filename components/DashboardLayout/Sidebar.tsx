@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { cn } from "@/lib/utils";
@@ -21,9 +20,10 @@ import {
 import { Clock4, HardDrive, Plus, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/store/use-modal-store";
-import { upload_to_bucket } from "@/lib/supabaseUpload";
+import { upload_to_bucket } from "@/lib/supabaseOperations";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
+import { useSupabase } from "@/store/use-supabase-store";
 
 const tabs = [
   {
@@ -53,9 +53,6 @@ const tabs = [
 ];
 
 const Sidebar = () => {
-  const supabaseURL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseKEY = process.env.NEXT_PUBLIC_SUPABASE_KEY || "";
-  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
   const [activeTab, setActiveTab] = useState(1);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<null | FileList>(null);
@@ -64,10 +61,7 @@ const Sidebar = () => {
   const { onOpen } = useModal();
   const { startTopLoader, stopTopLoader } = useLoaderStore();
   const { refetchFilesFolder } = useDataStore();
-
-  useEffect(() => {
-    setSupabase(createClient(supabaseURL, supabaseKEY));
-  }, [supabaseKEY, supabaseURL]);
+  const { supabase } = useSupabase();
 
   useEffect(() => {
     const uploadToDB = async (filePath: string) => {
@@ -83,16 +77,15 @@ const Sidebar = () => {
       }
     };
 
-    if (selectedFile) {
+    if (selectedFile && supabase) {
       const promise = () =>
         new Promise((resolve, reject) => {
           upload_to_bucket(selectedFile[0], supabase)
-            .then((response) => {
+            .then((response: any) => {
               const filePath = response.fullPath;
               uploadToDB(filePath).then((response) => {
                 if (response == "done") {
                   resolve(response);
-                  stopTopLoader();
                   refetchFilesFolder(new Date());
                 }
                 reject("failed");
@@ -100,8 +93,9 @@ const Sidebar = () => {
             })
             .catch((error) => {
               reject(error);
-              stopTopLoader();
             });
+        }).finally(() => {
+          stopTopLoader();
         });
 
       startTopLoader();

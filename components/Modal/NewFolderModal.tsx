@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -42,13 +42,14 @@ const NewFolderModal = () => {
       name: "",
     },
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const isModalOpen = isOpen && type === "newFolder";
   const { refetchFilesFolder } = useDataStore();
   const onSubmit = async (value: { name: string }) => {
     const isFolderRoute = pathName.includes("/folder/");
     try {
       startTopLoader();
+      setIsLoading(true);
       const folderName = value.name;
       let parentId = undefined;
 
@@ -70,11 +71,11 @@ const NewFolderModal = () => {
       } else {
         toast.error("Error while creating folder!");
       }
-
-      stopTopLoader();
     } catch (err) {
       console.log(err);
+    } finally {
       stopTopLoader();
+      setIsLoading(false);
     }
   };
   return (
@@ -113,7 +114,9 @@ const NewFolderModal = () => {
             <FormMessage />
 
             <DialogFooter className="bg-gray-100 px-6 py-4">
-              <Button variant="default">Create</Button>
+              <Button disabled={isLoading} variant="default">
+                Create
+              </Button>
             </DialogFooter>
           </form>
         </Form>
