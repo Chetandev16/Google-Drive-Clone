@@ -36,6 +36,15 @@ export async function DELETE(req: Request) {
       del = await db.folder.delete({
         where: { id, userId: user.id },
       });
+
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          free_tier_folders_created: (
+            parseInt(user.free_tier_folders_created) - 1
+          ).toString(),
+        },
+      });
     } else {
       const file = await db.file.findUnique({
         where: { id },
@@ -49,6 +58,15 @@ export async function DELETE(req: Request) {
 
       del = await db.file.delete({
         where: { id, userId: user.id },
+      });
+
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          free_tier_files_uploaded: (
+            parseInt(user.free_tier_files_uploaded) - 1
+          ).toString(),
+        },
       });
     }
 

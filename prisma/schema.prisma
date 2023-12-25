@@ -11,12 +11,16 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  userId   String @unique
-  name     String
-  imageUrl String @db.Text
-  email    String @db.Text
-  tier     String @default("FREE")
+  id                         String @id @default(uuid())
+  userId                     String @unique
+  name                       String
+  imageUrl                   String @db.Text
+  email                      String @db.Text
+  tier                       String @default("FREE")
+  free_tier_files_uploaded   String @default("0") @db.Text
+  free_tier_folders_created  String @default("0") @db.Text
+  free_tier_limit_of_files   String @default("5")
+  free_tier_limit_of_folders String @default("5")
 
   files   File[]
   folders Folder[]

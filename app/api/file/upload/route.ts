@@ -13,6 +13,16 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    if (
+      user.tier == "FREE" &&
+      user.free_tier_files_uploaded > user.free_tier_limit_of_files
+    ) {
+      return new NextResponse(
+        "Free tier allows 5 file to be uploaded! Upgrade to premium or delete existing files.",
+        { status: 403 }
+      );
+    }
+
     if (!isFolderRoute) {
       // Here i am createing a folder with name as same as user and folder id as user id to represent root folder path
       const rootFolderExist = await db.folder.findUnique({
@@ -41,6 +51,15 @@ export async function POST(req: Request) {
         inviteCode: uuidv4(),
         sharedWithEmail: [],
         startedBy: [],
+      },
+    });
+
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        free_tier_files_uploaded: (
+          parseInt(user.free_tier_files_uploaded) + 1
+        ).toString(),
       },
     });
 

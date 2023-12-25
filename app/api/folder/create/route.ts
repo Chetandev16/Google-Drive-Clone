@@ -10,6 +10,16 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    if (
+      user.tier == "FREE" &&
+      user.free_tier_folders_created >= user.free_tier_limit_of_folders
+    ) {
+      return new NextResponse(
+        "Free tier allows 5 folders to be uploaded! Upgrade to premium or delete existing folders.",
+        { status: 403 }
+      );
+    }
+
     const { parentId, folderName } = await req.json();
 
     if (!folderName) {
@@ -41,6 +51,15 @@ export async function POST(req: Request) {
         name: folderName,
         userId: user.id,
         parentId: parentId || user.id,
+      },
+    });
+
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        free_tier_folders_created: (
+          parseInt(user.free_tier_folders_created) + 1
+        ).toString(),
       },
     });
 

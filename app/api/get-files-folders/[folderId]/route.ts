@@ -35,7 +35,28 @@ export async function GET(
         },
       },
     },
-  })) || [{ files: [], folders: [] }];
+  })) || [
+    {
+      files: [],
+      folders: [],
+      userAccountInfo: { tier: "FREE", filesUploaded: 0, foldersCreated: 0 },
+    },
+  ];
 
-  return NextResponse.json({ files: user.files, folders: user.folders });
+  let userAccountInfo = {};
+
+  if (user) {
+    userAccountInfo = {
+      tier: user.tier,
+      filesUploaded: parseInt(user.free_tier_files_uploaded),
+      foldersCreated: parseInt(user.free_tier_folders_created),
+      totalFilesLimit: parseInt(user.free_tier_limit_of_files),
+      totalFoldersLimit: parseInt(user.free_tier_limit_of_folders),
+    };
+  }
+  return NextResponse.json({
+    files: user.files,
+    folders: user.folders,
+    userAccountInfo,
+  });
 }

@@ -32,7 +32,7 @@ const Home = () => {
 
       if (response.status == 200) {
         const { data } = response;
-        addDataToStore(data.files, data.folders);
+        addDataToStore(data.files, data.folders, data.userAccountInfo);
       }
 
       toggleFetchingData(false);

@@ -1,5 +1,6 @@
 "use client";
 
+import { loadStripe } from "@stripe/stripe-js";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
@@ -17,13 +18,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Clock4, HardDrive, Plus, Star, Users } from "lucide-react";
+import {
+  Clock4,
+  Crown,
+  HardDrive,
+  Plus,
+  Star,
+  User,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/store/use-modal-store";
 import { upload_to_bucket } from "@/lib/supabaseOperations";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
 import { useSupabase } from "@/store/use-supabase-store";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+
+const stripKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
+const asyncStripe = loadStripe(stripKey);
 
 const tabs = [
   {
@@ -59,8 +73,27 @@ const Sidebar = () => {
   const pathName = usePathname();
   const { onOpen } = useModal();
   const { startTopLoader, stopTopLoader } = useLoaderStore();
-  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
+  const { refetchFilesFolder, toggleFetchingData, userAccountInfo } =
+    useDataStore();
   const { supabase } = useSupabase();
+  const {
+    tier,
+    filesUploaded,
+    foldersCreated,
+    totalFilesLimit,
+    totalFoldersLimit,
+  } = userAccountInfo;
+  const [fileUploadedProgress, setFileUploadedProgress] = useState(0);
+  const [folderCreatedProgress, setFolderCreatedProgress] = useState(0);
+
+  useEffect(() => {
+    setFileUploadedProgress(
+      filesUploaded * 20 > 100 ? 100 : filesUploaded * 20
+    );
+    setFolderCreatedProgress(
+      foldersCreated * 20 > 100 ? 100 : foldersCreated * 20
+    );
+  }, [filesUploaded, foldersCreated, userAccountInfo]);
 
   useEffect(() => {
     const isFolderRoute = pathName.includes("/folder/");
@@ -109,6 +142,14 @@ const Sidebar = () => {
           stopTopLoader();
         });
 
+      if (filesUploaded >= totalFilesLimit) {
+        toast.error(
+          "Free tier allows 5 file to be uploaded! Upgrade to premium or delete existing files."
+        );
+        setSelectedFile(null);
+        return;
+      }
+
       startTopLoader();
       toast.promise(promise(), {
         loading: "Uploading...",
@@ -117,6 +158,7 @@ const Sidebar = () => {
       });
     }
   }, [
+    filesUploaded,
     pathName,
     refetchFilesFolder,
     selectedFile,
@@ -124,14 +166,35 @@ const Sidebar = () => {
     stopTopLoader,
     supabase,
     toggleFetchingData,
+    totalFilesLimit,
   ]);
 
   const changeActiveTab = (id: number) => {
     setActiveTab(id);
   };
 
+  const stripHandler = async () => {
+    try {
+      const stripe = await asyncStripe;
+      if (!stripe) return;
+      const res = await axios.post("/api/stripe/session", {
+        amount: "2000",
+      });
+
+      const { sessionId } = res.data;
+
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+
+      if (error) {
+        toast.error("Error redirecting to checkout");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
-    <div className="w-[20%] 2xl:w-[10%] bg-[#F7F9FC] hidden sm:flex flex-col p-2 lg:p-2 xl:p-4">
+    <div className="w-[20%] 2xl:w-[10%] bg-[#F7F9FC] hidden lg:flex flex-col p-2 lg:p-2 xl:p-4">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -202,6 +265,58 @@ const Sidebar = () => {
             </Tooltip>
           </TooltipProvider>
         ))}
+      </div>
+
+      <Separator className="mt-4" />
+
+      {/* Account info */}
+      <div className="flex flex-col p-4 space-y-4">
+        <h2
+          className={cn(
+            "flex justify-center items-center gap-2 text-sm p-2 font-bold rounded-xl",
+            tier == "FREE"
+              ? " text-white bg-blue-200"
+              : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+          )}
+        >
+          {tier == "FREE" ? (
+            <User className="h-4 w-4" />
+          ) : (
+            <Crown className="h-4 w-4" />
+          )}
+          <p>{tier} PLAN</p>
+        </h2>
+        <div className="flex flex-col">
+          <p className="text-xs">
+            {tier !== "FREE"
+              ? "Unlimited file uploads"
+              : `${filesUploaded} / ${totalFilesLimit} files uploaded`}
+          </p>
+          <div className="w-full">
+            <Progress value={fileUploadedProgress} className="w-full h-2" />
+          </div>
+        </div>
+        <div className="flex flex-col">
+          <p className="text-xs">
+            {tier !== "FREE"
+              ? "Unlimited folder creation"
+              : `${foldersCreated} / ${totalFoldersLimit} folders created`}
+          </p>
+          <div className="w-full">
+            <Progress value={folderCreatedProgress} className="w-full h-2" />
+          </div>
+        </div>
+
+        {tier == "FREE" && (
+          <Button
+            onClick={() => stripHandler()}
+            className="hover:bg-blue-500 gap-2 hover:text-white focus:outline-none focus:ring focus:border-blue-300 transition duration-300 ease-in-out transform hover:scale-105 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-md py-2 px-4"
+            variant={"outline"}
+          >
+            <Crown className="h-4 w-4" />
+            Premium
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname } from "next/navigation";
 import axios from "axios";
-
+import { isEmpty } from "lodash";
 import {
   Dialog,
   DialogContent,
@@ -68,11 +68,14 @@ const NewFolderModal = () => {
         refetchFilesFolder(new Date());
         form.reset();
         onClose();
-      } else {
-        toast.error("Error while creating folder!");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
+      toast.error(
+        isEmpty(err.response.data)
+          ? "Error creating folder!"
+          : err.response.data
+      );
     } finally {
       stopTopLoader();
       setIsLoading(false);

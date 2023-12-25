@@ -60,7 +60,7 @@ const FolderPage: React.FC<Props> = ({ params }) => {
 
       if (response.status == 200) {
         const { data } = response;
-        addDataToStore(data.files, data.folders);
+        addDataToStore(data.files, data.folders, data.userAccountInfo);
       }
 
       getBreadCrumbData();
