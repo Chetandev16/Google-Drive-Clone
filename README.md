@@ -2,7 +2,7 @@
 
 ## Tech stack used:
 
-Typescript, NextJS, PrismaORM, Supabase(Postgresql), Clerk, Stripe, Zustand (State management)
+Typescript, NextJS, Tailwind CSS , PrismaORM, Supabase(Postgresql), Clerk, Stripe, Zustand (State management)
 
 ## Environment Variables:-
 
