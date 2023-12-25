@@ -88,10 +88,18 @@ const Sidebar = () => {
 
   useEffect(() => {
     setFileUploadedProgress(
-      filesUploaded * 20 > 100 ? 100 : filesUploaded * 20
+      userAccountInfo.tier !== "FREE"
+        ? 100
+        : filesUploaded * 20 > 100
+        ? 100
+        : filesUploaded * 20
     );
     setFolderCreatedProgress(
-      foldersCreated * 20 > 100 ? 100 : foldersCreated * 20
+      userAccountInfo.tier !== "FREE"
+        ? 100
+        : foldersCreated * 20 > 100
+        ? 100
+        : foldersCreated * 20
     );
   }, [filesUploaded, foldersCreated, userAccountInfo]);
 
