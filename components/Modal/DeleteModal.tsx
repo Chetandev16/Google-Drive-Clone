@@ -22,7 +22,7 @@ import { delete_from_bucket } from "@/lib/supabaseOperations";
 
 export const DeleteModal = () => {
   const { isOpen, onClose, type, data } = useModal();
-  const { refetchFilesFolder } = useDataStore();
+  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
   const { startTopLoader, stopTopLoader } = useLoaderStore();
   const [isLoading, setIsLoading] = useState(false);
   const { supabase } = useSupabase();
@@ -52,12 +52,14 @@ export const DeleteModal = () => {
 
       await axios.delete(url);
       toast.success(`${deleteType} deleted successfully`);
+      toggleFetchingData(true);
       refetchFilesFolder(new Date());
       onClose();
     } catch (err) {
       console.log(err);
     } finally {
       setIsLoading(false);
+      toggleFetchingData(false);
       stopTopLoader();
     }
   };
@@ -96,6 +98,7 @@ export const DeleteModal = () => {
             deleteFromDB().then((response) => {
               if (response == "done") {
                 resolve(response);
+                toggleFetchingData(true);
                 refetchFilesFolder(new Date());
               }
               reject("failed");
@@ -106,6 +109,7 @@ export const DeleteModal = () => {
           });
       }).finally(() => {
         stopTopLoader();
+        toggleFetchingData(false);
         refetchFilesFolder(new Date());
         onClose();
       });

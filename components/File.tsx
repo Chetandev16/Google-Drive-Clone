@@ -9,7 +9,7 @@ import { Play } from "lucide-react";
 import { identifyContentType } from "@/lib/getFileType";
 
 interface Props {
-  id: Number;
+  id: number;
   name: string;
   url: string;
   layout: string;

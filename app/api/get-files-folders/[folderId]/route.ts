@@ -1,5 +1,6 @@
 import { currentUser } from "@/lib/current-user";
 import { db } from "@/lib/db";
+import { map } from "lodash";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -18,21 +19,23 @@ export async function GET(
     return new NextResponse("Folder id is required", { status: 401 });
   }
 
-  const user = await db.user.findUnique({
+  const user: any = (await db.user.findUnique({
     where: { id: currUser.id },
     include: {
       files: {
         where: { folderId },
+        orderBy: {
+          createdAt: "asc",
+        },
       },
       folders: {
         where: { parentId: folderId, userId: currUser.id },
-        include: {
-          files: true,
-          folders: true,
+        orderBy: {
+          createdAt: "asc",
         },
       },
     },
-  });
+  })) || [{ files: [], folders: [] }];
 
-  return NextResponse.json(user);
+  return NextResponse.json({ files: user.files, folders: user.folders });
 }

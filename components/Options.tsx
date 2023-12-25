@@ -6,15 +6,16 @@ import {
 } from "@/components/ui/popover";
 
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Star, Trash } from "lucide-react";
+import { MoreVertical, Pencil, Star, Trash } from "lucide-react";
 import { useModal } from "@/store/use-modal-store";
 
 interface Props {
   type: string;
   name: string;
-  id: Number;
+  id: number;
+  onClickEdit?: (id: number) => void;
 }
-const Options: React.FC<Props> = ({ type, name, id }) => {
+const Options: React.FC<Props> = ({ type, name, id, onClickEdit }) => {
   const { onOpen } = useModal();
   return (
     <Popover>
@@ -26,6 +27,25 @@ const Options: React.FC<Props> = ({ type, name, id }) => {
 
       <PopoverContent side="top">
         <div>
+          {type == "File" && (
+            <div>
+              <p className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md">
+                <Star className="h-4 w-4 text-slate-600" />
+                Star
+              </p>
+            </div>
+          )}
+          {type == "Folder" && onClickEdit && (
+            <div>
+              <p
+                onClick={() => onClickEdit(id)}
+                className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"
+              >
+                <Pencil className="h-4 w-4 text-slate-600" />
+                Edit
+              </p>
+            </div>
+          )}
           <div>
             <p
               onClick={() => onOpen("delete", { id, name, deleteType: type })}
@@ -35,14 +55,6 @@ const Options: React.FC<Props> = ({ type, name, id }) => {
               Delete
             </p>
           </div>
-          {type == "File" && (
-            <div>
-              <p className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md">
-                <Star className="h-4 w-4 text-slate-600" />
-                Star
-              </p>
-            </div>
-          )}
         </div>
       </PopoverContent>
     </Popover>

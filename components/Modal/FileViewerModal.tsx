@@ -80,10 +80,10 @@ const FileViewerModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white text-black p-0 overflow-hidden">
+      <DialogContent className="bg-white text-black p-0 overflow-hidden !gap-0">
         <div className="w-full">{getPreivewMedia()}</div>
         <DialogFooter className="bg-gray-100 px-6 py-6">
-          <div className="flex items-center justify-between w-full">
+          <div className="flex items-center justify-end w-full">
             <Button onClick={() => downloadFile()}>Download</Button>
           </div>
         </DialogFooter>

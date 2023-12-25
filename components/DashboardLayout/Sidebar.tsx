@@ -57,16 +57,24 @@ const Sidebar = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<null | FileList>(null);
   const pathName = usePathname();
-  const isFolderRoute = pathName.includes("/folder/");
   const { onOpen } = useModal();
   const { startTopLoader, stopTopLoader } = useLoaderStore();
-  const { refetchFilesFolder } = useDataStore();
+  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
   const { supabase } = useSupabase();
 
   useEffect(() => {
+    const isFolderRoute = pathName.includes("/folder/");
     const uploadToDB = async (filePath: string) => {
+      let folderId = "";
+      if (isFolderRoute) {
+        folderId = pathName?.split("/")?.pop() || "";
+      }
       try {
-        await axios.post("/api/file/upload", { filePath, isFolderRoute });
+        await axios.post("/api/file/upload", {
+          filePath,
+          isFolderRoute,
+          folderId,
+        });
         return new Promise((resolve) => {
           resolve("done");
         });
@@ -86,6 +94,7 @@ const Sidebar = () => {
               uploadToDB(filePath).then((response) => {
                 if (response == "done") {
                   resolve(response);
+                  toggleFetchingData(true);
                   refetchFilesFolder(new Date());
                 }
                 reject("failed");
@@ -95,6 +104,8 @@ const Sidebar = () => {
               reject(error);
             });
         }).finally(() => {
+          setSelectedFile(null);
+          toggleFetchingData(false);
           stopTopLoader();
         });
 
@@ -106,12 +117,13 @@ const Sidebar = () => {
       });
     }
   }, [
-    isFolderRoute,
+    pathName,
     refetchFilesFolder,
     selectedFile,
     startTopLoader,
     stopTopLoader,
     supabase,
+    toggleFetchingData,
   ]);
 
   const changeActiveTab = (id: number) => {
