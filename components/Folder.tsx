@@ -66,7 +66,12 @@ const FolderComponent: React.FC<Props> = ({ name, id, layout }) => {
               {name}
             </p>
           ) : (
-            <div onClick={(e) => e.stopPropagation()} className="relative">
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="relative"
+            >
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
