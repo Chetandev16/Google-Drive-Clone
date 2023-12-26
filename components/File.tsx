@@ -10,6 +10,7 @@ import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
 import { Play } from "lucide-react";
 import axios from "axios";
+import { useDrawerStore } from "@/store/use-file-drawer-store";
 
 interface Props {
   id: number;
@@ -18,6 +19,7 @@ interface Props {
   layout: string;
   stared: boolean;
   fileInviteCode: string;
+  hideOptions?: boolean;
 }
 
 const FileIcon = {
@@ -33,21 +35,29 @@ const FileViewer: React.FC<Props> = ({
   stared,
   layout,
   fileInviteCode,
+  hideOptions = false,
 }) => {
   const { startTopLoader, stopTopLoader } = useLoaderStore();
-  const { refetchFilesFolder } = useDataStore();
+  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
+  const { onChangeDrawer } = useDrawerStore();
 
   const onClickStar = async (id: number, isStared: boolean) => {
     try {
       startTopLoader();
+      toggleFetchingData(true);
 
       await axios.put("/api/file/star/update", { isStared, fileId: id });
 
       refetchFilesFolder(new Date());
     } catch (e) {
     } finally {
+      toggleFetchingData(false);
       stopTopLoader();
     }
+  };
+
+  const onClickInfo = () => {
+    onChangeDrawer(id, name, url, stared, fileInviteCode);
   };
 
   const getPreivewMedia = () => {
@@ -95,16 +105,19 @@ const FileViewer: React.FC<Props> = ({
             {name}
           </h1>
 
-          <div className="absolute right-0">
-            <Options
-              name={name}
-              id={id}
-              type="File"
-              isFileStared={stared}
-              onClickStar={onClickStar}
-              fileInviteCode={fileInviteCode}
-            />
-          </div>
+          {!hideOptions && (
+            <div className="absolute right-0">
+              <Options
+                name={name}
+                id={id}
+                type="File"
+                isFileStared={stared}
+                onClickStar={onClickStar}
+                fileInviteCode={fileInviteCode}
+                onClickInfo={onClickInfo}
+              />
+            </div>
+          )}
         </div>
         <div
           onClick={() =>
@@ -134,9 +147,19 @@ const FileViewer: React.FC<Props> = ({
           </h1>
         </div>
 
-        <div onClick={(e) => e.stopPropagation()} className="">
-          <Options name={name} id={id} type="File" onClickStar={onClickStar} />
-        </div>
+        {!hideOptions && (
+          <div onClick={(e) => e.stopPropagation()} className="">
+            <Options
+              name={name}
+              id={id}
+              type="File"
+              isFileStared={stared}
+              onClickStar={onClickStar}
+              fileInviteCode={fileInviteCode}
+              onClickInfo={onClickInfo}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

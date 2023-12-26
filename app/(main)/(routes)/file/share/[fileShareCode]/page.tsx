@@ -24,7 +24,7 @@ const ShareFile: React.FC<Props> = async ({ params }) => {
     },
   });
 
-  const isUserExist = fileExist?.sharedWithEmail?.includes(profile.email);
+  const isUserExist = fileExist?.sharedWith?.includes(profile.id);
   const isFileOwner = fileExist?.userId == profile.id;
 
   if (isUserExist || !fileExist || isFileOwner) {
@@ -36,7 +36,7 @@ const ShareFile: React.FC<Props> = async ({ params }) => {
       id: fileExist.id,
     },
     data: {
-      sharedWithEmail: { push: profile.email },
+      sharedWith: { push: profile.id },
     },
   });
 

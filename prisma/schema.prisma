@@ -30,12 +30,12 @@ model User {
 }
 
 model File {
-  id              String   @id @default(uuid())
-  name            String
-  uploadedURL     String   @db.Text
-  inviteCode      String   @db.Text
-  sharedWithEmail String[] @db.Text
-  startedBy       String[] @db.Text
+  id          String   @id @default(uuid())
+  name        String
+  uploadedURL String   @db.Text
+  inviteCode  String   @db.Text
+  sharedWith  String[] @db.Text
+  startedBy   String[] @db.Text
 
   userId   String
   folderId String

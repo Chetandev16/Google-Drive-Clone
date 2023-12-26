@@ -1,14 +1,25 @@
 "use client";
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
 import { Button } from "@/components/ui/button";
-import { Forward, MoreVertical, Pencil, Star, Trash } from "lucide-react";
+import { Forward, Info, MoreVertical, Pencil, Star, Trash } from "lucide-react";
 import { useModal } from "@/store/use-modal-store";
 import { cn } from "@/lib/utils";
+import { useDrawerStore } from "@/store/use-file-drawer-store";
 
 interface Props {
   type: string;
@@ -18,6 +29,7 @@ interface Props {
   onClickStar?: (id: number, isStared: boolean) => void;
   isFileStared?: boolean;
   fileInviteCode?: string;
+  onClickInfo?: () => void;
 }
 
 const Options: React.FC<Props> = ({
@@ -26,10 +38,12 @@ const Options: React.FC<Props> = ({
   id,
   onClickEdit,
   onClickStar,
+  onClickInfo,
   isFileStared,
   fileInviteCode,
 }) => {
   const { onOpen } = useModal();
+  const { url, stared } = useDrawerStore();
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -40,12 +54,32 @@ const Options: React.FC<Props> = ({
 
       <PopoverContent side="top">
         <div>
+          {type === "File" && onClickInfo && (
+            <div>
+              <Sheet>
+                <SheetTrigger
+                  onClick={() => onClickInfo()}
+                  className="cursor-pointer w-full flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"
+                >
+                  <Info className="h-4 w-4 text-slate-600" />
+                  Info
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>{name}</SheetTitle>
+                    <SheetDescription></SheetDescription>
+                  </SheetHeader>
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
           {type === "File" && (
             <div>
               <p
                 onClick={() =>
                   onOpen("share", {
                     fileInviteCode,
+                    id,
                   })
                 }
                 className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"

@@ -46,28 +46,28 @@ const tabs = [
     label: "My Drive",
     icon: <HardDrive className="w-5 h-5 text-slate-800" />,
     tooltip: "my drive",
-    url: "home",
+    url: "/dashboard/home",
   },
   {
     id: 2,
     label: "Shared with me",
     icon: <Users className="w-5 h-5 text-slate-800" />,
     tooltip: "items shared with me",
-    url: "shared",
+    url: "/dashboard/shared",
   },
   {
     id: 3,
     label: "Recents",
     icon: <Clock4 className="w-5 h-5 text-slate-800" />,
     tooltip: "recents",
-    url: "recents",
+    url: "/dashboard/recents",
   },
   {
     id: 4,
     label: "Stared",
     icon: <Star className="w-5 h-5 text-slate-800" />,
     tooltip: "stared items",
-    url: "stared",
+    url: "/dashboard/stared",
   },
 ];
 
