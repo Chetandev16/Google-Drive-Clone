@@ -1,6 +1,6 @@
 import { currentUser } from "@/lib/current-user";
 import { db } from "@/lib/db";
-import { map } from "lodash";
+import { cloneDeep, map } from "lodash";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -54,8 +54,25 @@ export async function GET(
       totalFoldersLimit: parseInt(user.free_tier_limit_of_folders),
     };
   }
+
+  const files = map(user.files, (file) => {
+    const startedBy = cloneDeep(file.startedBy);
+    delete file.startedBy;
+    if (startedBy.includes(currUser.id)) {
+      return {
+        ...file,
+        stared: true,
+      };
+    }
+
+    return {
+      ...file,
+      stared: false,
+    };
+  });
+
   return NextResponse.json({
-    files: user.files,
+    files,
     folders: user.folders,
     userAccountInfo,
   });

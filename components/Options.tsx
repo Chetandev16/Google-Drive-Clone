@@ -6,16 +6,29 @@ import {
 } from "@/components/ui/popover";
 
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Pencil, Star, Trash } from "lucide-react";
+import { Forward, MoreVertical, Pencil, Star, Trash } from "lucide-react";
 import { useModal } from "@/store/use-modal-store";
+import { cn } from "@/lib/utils";
 
 interface Props {
   type: string;
   name: string;
   id: number;
   onClickEdit?: (id: number) => void;
+  onClickStar?: (id: number, isStared: boolean) => void;
+  isFileStared?: boolean;
+  fileInviteCode?: string;
 }
-const Options: React.FC<Props> = ({ type, name, id, onClickEdit }) => {
+
+const Options: React.FC<Props> = ({
+  type,
+  name,
+  id,
+  onClickEdit,
+  onClickStar,
+  isFileStared,
+  fileInviteCode,
+}) => {
   const { onOpen } = useModal();
   return (
     <Popover>
@@ -27,10 +40,34 @@ const Options: React.FC<Props> = ({ type, name, id, onClickEdit }) => {
 
       <PopoverContent side="top">
         <div>
-          {type == "File" && (
+          {type === "File" && (
             <div>
-              <p className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md">
-                <Star className="h-4 w-4 text-slate-600" />
+              <p
+                onClick={() =>
+                  onOpen("share", {
+                    fileInviteCode,
+                  })
+                }
+                className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"
+              >
+                <Forward className="h-4 w-4 text-slate-600" />
+                Share
+              </p>
+            </div>
+          )}
+          {type == "File" && onClickStar && isFileStared !== undefined && (
+            <div>
+              <p
+                onClick={() => onClickStar(id, !isFileStared)}
+                className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"
+              >
+                <Star
+                  className={cn(
+                    isFileStared && "fill-[#e1ad21] ",
+                    "h-4 w-4 text-slate-600"
+                  )}
+                  color={isFileStared ? "#e1ad21" : "#475569"}
+                />
                 Star
               </p>
             </div>

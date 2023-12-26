@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ModalType = "newFolder" | "delete" | "fileViewer";
+export type ModalType = "newFolder" | "delete" | "fileViewer" | "share";
 
 type DataState = {
   name?: string;
@@ -8,6 +8,7 @@ type DataState = {
   deleteType?: string;
   fileUrl?: string;
   fileType?: string;
+  fileInviteCode?: string;
 };
 interface ModalStore {
   type: ModalType | null;

@@ -56,6 +56,8 @@ const RenderData: React.FC<Props> = ({ folders, files, layout }) => {
                   name={file.name}
                   url={file.uploadedURL}
                   layout={layout}
+                  stared={file.stared}
+                  fileInviteCode={file.inviteCode}
                 />
               </div>
             );

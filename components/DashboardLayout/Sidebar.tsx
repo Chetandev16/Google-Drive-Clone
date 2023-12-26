@@ -35,6 +35,7 @@ import { useDataStore } from "@/store/use-data-store";
 import { useSupabase } from "@/store/use-supabase-store";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
 
 const stripKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
 const asyncStripe = loadStripe(stripKey);
@@ -45,29 +46,34 @@ const tabs = [
     label: "My Drive",
     icon: <HardDrive className="w-5 h-5 text-slate-800" />,
     tooltip: "my drive",
+    url: "home",
   },
   {
     id: 2,
     label: "Shared with me",
     icon: <Users className="w-5 h-5 text-slate-800" />,
     tooltip: "items shared with me",
+    url: "shared",
   },
   {
     id: 3,
     label: "Recents",
     icon: <Clock4 className="w-5 h-5 text-slate-800" />,
     tooltip: "recents",
+    url: "recents",
   },
   {
     id: 4,
     label: "Stared",
     icon: <Star className="w-5 h-5 text-slate-800" />,
     tooltip: "stared items",
+    url: "stared",
   },
 ];
 
 const Sidebar = () => {
-  const [activeTab, setActiveTab] = useState(1);
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<null | FileList>(null);
   const pathName = usePathname();
@@ -85,6 +91,27 @@ const Sidebar = () => {
   } = userAccountInfo;
   const [fileUploadedProgress, setFileUploadedProgress] = useState(0);
   const [folderCreatedProgress, setFolderCreatedProgress] = useState(0);
+
+  useEffect(() => {
+    if (activeTab == 0) {
+      const currentURL = pathName.split("/")?.[pathName.split("/")?.length - 1];
+      switch (currentURL) {
+        case "home":
+          setActiveTab(1);
+          break;
+        case "shared":
+          setActiveTab(2);
+          break;
+        case "recents":
+          setActiveTab(3);
+          break;
+        case "stared":
+          setActiveTab(4);
+          break;
+        default:
+      }
+    }
+  }, [activeTab, pathName]);
 
   useEffect(() => {
     setFileUploadedProgress(
@@ -150,7 +177,7 @@ const Sidebar = () => {
           stopTopLoader();
         });
 
-      if (filesUploaded >= totalFilesLimit) {
+      if (tier == "FREE" && filesUploaded >= totalFilesLimit) {
         toast.error(
           "Free tier allows 5 file to be uploaded! Upgrade to premium or delete existing files."
         );
@@ -173,12 +200,14 @@ const Sidebar = () => {
     startTopLoader,
     stopTopLoader,
     supabase,
+    tier,
     toggleFetchingData,
     totalFilesLimit,
   ]);
 
   const changeActiveTab = (id: number) => {
     setActiveTab(id);
+    router.push(tabs[id - 1].url);
   };
 
   const stripHandler = async () => {
