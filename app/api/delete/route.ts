@@ -45,6 +45,10 @@ export async function DELETE(req: Request) {
           ).toString(),
         },
       });
+
+      return NextResponse.json({
+        folder_id: folder.id,
+      });
     } else {
       const file = await db.file.findUnique({
         where: { id },
@@ -68,9 +72,11 @@ export async function DELETE(req: Request) {
           ).toString(),
         },
       });
-    }
 
-    return NextResponse.json(del);
+      return NextResponse.json({
+        file_id: file.id,
+      });
+    }
   } catch (error) {
     console.log("[DELETE_FOLDER_FILE]", error);
     return new NextResponse("Internal Error", { status: 500 });

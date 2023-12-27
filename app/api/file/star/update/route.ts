@@ -41,7 +41,8 @@ export async function PUT(req: Request) {
     }
 
     return NextResponse.json({
-      status: "OK",
+      file_stared: isStared,
+      file_id: fileId,
     });
   } catch (err) {
     return new NextResponse("Internal Server Error", { status: 500 });

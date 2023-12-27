@@ -19,16 +19,18 @@ import { useDataStore } from "@/store/use-data-store";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useSupabase } from "@/store/use-supabase-store";
 import { delete_from_bucket } from "@/lib/supabaseOperations";
+import { filter, forEach } from "lodash";
 
 export const DeleteModal = () => {
   const { isOpen, onClose, type, data } = useModal();
-  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
+  const { files, folders, addDataToStore, userAccountInfo } = useDataStore();
   const { startTopLoader, stopTopLoader } = useLoaderStore();
   const [isLoading, setIsLoading] = useState(false);
   const { supabase } = useSupabase();
 
   if (!data) return;
   const { name, deleteType, id } = data;
+  const { email } = userAccountInfo;
 
   if (!name || !deleteType || !id) return null;
 
@@ -50,16 +52,23 @@ export const DeleteModal = () => {
         query,
       });
 
-      await axios.delete(url);
+      const res = await axios.delete(url);
+
+      const { folder_id } = res.data;
+
+      const updatedFolders = filter(
+        folders,
+        (folder) => folder.id !== folder_id
+      );
+
+      addDataToStore(files, updatedFolders);
+
       toast.success(`${deleteType} deleted successfully`);
-      toggleFetchingData(true);
-      refetchFilesFolder(new Date());
       onClose();
     } catch (err) {
       console.log(err);
     } finally {
       setIsLoading(false);
-      toggleFetchingData(false);
       stopTopLoader();
     }
   };
@@ -77,7 +86,13 @@ export const DeleteModal = () => {
         query,
       });
 
-      await axios.delete(url);
+      const res = await axios.delete(url);
+      const { file_id } = res.data;
+
+      const updatedFiles = filter(files, (file) => file.id !== file_id);
+
+      addDataToStore(updatedFiles, folders);
+
       return new Promise((resolve) => {
         resolve("done");
       });
@@ -93,13 +108,11 @@ export const DeleteModal = () => {
     startTopLoader();
     const promise = () =>
       new Promise((resolve, reject) => {
-        delete_from_bucket(name, supabase)
+        delete_from_bucket(name, supabase, email)
           .then(() => {
             deleteFromDB().then((response) => {
               if (response == "done") {
                 resolve(response);
-                toggleFetchingData(true);
-                refetchFilesFolder(new Date());
               }
               reject("failed");
             });
@@ -109,8 +122,6 @@ export const DeleteModal = () => {
           });
       }).finally(() => {
         stopTopLoader();
-        toggleFetchingData(false);
-        refetchFilesFolder(new Date());
         onClose();
       });
     toast.promise(promise(), {

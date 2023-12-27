@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 type UserAccountInfo = {
   tier: string;
+  email: string;
   filesUploaded: number;
   foldersCreated: number;
   totalFilesLimit: number;
@@ -16,9 +17,9 @@ interface DataState {
   refetchData: any;
   breadCrumbData: string[];
   addDataToStore: (
-    files: any[],
-    folders: any[],
-    userAccountInfo: UserAccountInfo
+    files?: any[],
+    folders?: any[],
+    userAccountInfo?: UserAccountInfo
   ) => void;
   resetData: () => void;
   setSearchKeyword: (keyword: string) => void;
@@ -33,6 +34,7 @@ export const useDataStore = create<DataState>((set) => ({
   folders: [],
   userAccountInfo: {
     tier: "FREE",
+    email: "",
     filesUploaded: 0,
     foldersCreated: 0,
     totalFilesLimit: 5,
@@ -43,10 +45,12 @@ export const useDataStore = create<DataState>((set) => ({
   refetchData: null,
   breadCrumbData: [],
   addDataToStore: (files, folders, userAccountInfo) =>
-    set(() => ({
-      files: [...files],
-      folders: [...folders],
-      userAccountInfo: { ...userAccountInfo },
+    set((state) => ({
+      files: files ? [...files] : state.files,
+      folders: folders ? [...folders] : state.folders,
+      userAccountInfo: userAccountInfo
+        ? { ...userAccountInfo }
+        : state.userAccountInfo,
     })),
   resetData: () => set({ files: [], folders: [] }),
   setSearchKeyword: (keyword) =>

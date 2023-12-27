@@ -79,8 +79,7 @@ const Sidebar = () => {
   const pathName = usePathname();
   const { onOpen } = useModal();
   const { startTopLoader, stopTopLoader } = useLoaderStore();
-  const { refetchFilesFolder, toggleFetchingData, userAccountInfo } =
-    useDataStore();
+  const { files, addDataToStore, userAccountInfo } = useDataStore();
   const { supabase } = useSupabase();
   const {
     tier,
@@ -138,11 +137,20 @@ const Sidebar = () => {
         folderId = pathName?.split("/")?.pop() || "";
       }
       try {
-        await axios.post("/api/file/upload", {
+        const res = await axios.post("/api/file/upload", {
           filePath,
           isFolderRoute,
           folderId,
         });
+
+        setSelectedFile(null);
+        const { file } = res.data;
+
+        const updatedFiles = [...files];
+        updatedFiles.push(file);
+
+        addDataToStore(updatedFiles);
+
         return new Promise((resolve) => {
           resolve("done");
         });
@@ -156,14 +164,12 @@ const Sidebar = () => {
     if (selectedFile && supabase) {
       const promise = () =>
         new Promise((resolve, reject) => {
-          upload_to_bucket(selectedFile[0], supabase)
+          upload_to_bucket(selectedFile[0], supabase, userAccountInfo.email)
             .then((response: any) => {
               const filePath = response.fullPath;
               uploadToDB(filePath).then((response) => {
                 if (response == "done") {
                   resolve(response);
-                  toggleFetchingData(true);
-                  refetchFilesFolder(new Date());
                 }
                 reject("failed");
               });
@@ -173,7 +179,6 @@ const Sidebar = () => {
             });
         }).finally(() => {
           setSelectedFile(null);
-          toggleFetchingData(false);
           stopTopLoader();
         });
 
@@ -193,16 +198,17 @@ const Sidebar = () => {
       });
     }
   }, [
+    addDataToStore,
+    files,
     filesUploaded,
     pathName,
-    refetchFilesFolder,
     selectedFile,
     startTopLoader,
     stopTopLoader,
     supabase,
     tier,
-    toggleFetchingData,
     totalFilesLimit,
+    userAccountInfo.email,
   ]);
 
   const changeActiveTab = (id: number) => {

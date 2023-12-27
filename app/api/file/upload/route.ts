@@ -63,7 +63,9 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(file);
+    return NextResponse.json({
+      file,
+    });
   } catch (error) {
     console.log("[SERVERS_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });

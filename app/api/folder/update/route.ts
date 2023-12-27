@@ -24,7 +24,10 @@ export async function PUT(req: Request) {
       },
     });
 
-    return NextResponse.json(folder);
+    return NextResponse.json({
+      folder_id: folder.id,
+      folder_name: folder.name,
+    });
   } catch (err) {
     console.log("[FOLDER_UPDATE]", err);
     return new NextResponse("Internal Server Error", { status: 500 });

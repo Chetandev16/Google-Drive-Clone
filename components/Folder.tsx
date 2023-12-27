@@ -13,7 +13,7 @@ import Options from "@/components/Options";
 import { Folder, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { isEmpty } from "lodash";
+import { forEach, isEmpty } from "lodash";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
 
@@ -21,26 +21,36 @@ const FolderComponent: React.FC<Props> = ({ name, id, layout }) => {
   const [isEditName, setIsEditName] = useState(false);
   const [nameOnEdit, setNameOnEdit] = useState(name);
   const { startTopLoader, stopTopLoader } = useLoaderStore();
-  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
+  const { addDataToStore, folders, files } = useDataStore();
   const router = useRouter();
 
   const onClickEdit = () => {
     setIsEditName(true);
   };
 
-  const updateFolderNameinDB = () => {
+  const updateFolderNameinDB = async () => {
     try {
       startTopLoader();
-      axios.put("/api/folder/update", { folderId: id, folderName: nameOnEdit });
-      toggleFetchingData(true);
-      refetchFilesFolder(new Date());
+      const res = await axios.put("/api/folder/update", {
+        folderId: id,
+        folderName: nameOnEdit,
+      });
+
+      const { folder_id, folder_name } = res.data;
+
+      const updatedFolders = forEach(folders, (folder) => {
+        if (folder.id === folder_id) {
+          folder.name = folder_name;
+        }
+      });
+
+      addDataToStore(files, updatedFolders);
     } catch (err) {
       console.log(err);
       toast.error("Error occurred while updating folder name!");
     } finally {
       setIsEditName(false);
       stopTopLoader();
-      toggleFetchingData(false);
     }
   };
 

@@ -44,7 +44,8 @@ const NewFolderModal = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const isModalOpen = isOpen && type === "newFolder";
-  const { refetchFilesFolder } = useDataStore();
+  const { files, folders, addDataToStore } = useDataStore();
+
   const onSubmit = async (value: { name: string }) => {
     const isFolderRoute = pathName.includes("/folder/");
     try {
@@ -63,12 +64,15 @@ const NewFolderModal = () => {
         parentId,
       });
 
-      if (res.status == 200) {
-        toast.success(`Folder created: ${value.name}`);
-        refetchFilesFolder(new Date());
-        form.reset();
-        onClose();
-      }
+      const { folder } = res.data;
+      const upddatedFolder = folders;
+      upddatedFolder.push(folder);
+      addDataToStore(files, folders);
+
+      toast.success(`Folder created: ${value.name}`);
+      form.reset();
+      onClose();
+      onClose();
     } catch (err: any) {
       console.log(err);
       toast.error(

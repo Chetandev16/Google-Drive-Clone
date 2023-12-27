@@ -11,6 +11,7 @@ import { useDataStore } from "@/store/use-data-store";
 import { Play } from "lucide-react";
 import axios from "axios";
 import { useDrawerStore } from "@/store/use-file-drawer-store";
+import { forEach } from "lodash";
 
 interface Props {
   id: number;
@@ -38,20 +39,29 @@ const FileViewer: React.FC<Props> = ({
   hideOptions = false,
 }) => {
   const { startTopLoader, stopTopLoader } = useLoaderStore();
-  const { refetchFilesFolder, toggleFetchingData } = useDataStore();
+  const { files, addDataToStore } = useDataStore();
   const { onChangeDrawer } = useDrawerStore();
 
   const onClickStar = async (id: number, isStared: boolean) => {
     try {
       startTopLoader();
-      toggleFetchingData(true);
 
-      await axios.put("/api/file/star/update", { isStared, fileId: id });
+      const res = await axios.put("/api/file/star/update", {
+        isStared,
+        fileId: id,
+      });
 
-      refetchFilesFolder(new Date());
+      const { file_id, file_stared } = res.data;
+
+      const updatesFiles = forEach(files, (file) => {
+        if (file.id === file_id) {
+          file.stared = file_stared;
+        }
+      });
+
+      addDataToStore(updatesFiles);
     } catch (e) {
     } finally {
-      toggleFetchingData(false);
       stopTopLoader();
     }
   };
