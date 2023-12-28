@@ -45,7 +45,7 @@ const SideDrawer: React.FC<Props> = ({ fileId }) => {
   useEffect(() => {
     const getFileDetails = async () => {
       const url = qs.stringifyUrl({
-        url: "/api/file/details",
+        url: "/api/file/detail",
         query: { fileId },
       });
       const res = await axios.get(url);
