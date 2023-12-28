@@ -10,16 +10,15 @@ import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
 import { Play } from "lucide-react";
 import axios from "axios";
-import { useDrawerStore } from "@/store/use-file-drawer-store";
 import { forEach } from "lodash";
 
 interface Props {
-  id: number;
+  id?: number;
   name: string;
   url: string;
   layout: string;
-  stared: boolean;
-  fileInviteCode: string;
+  stared?: boolean;
+  fileInviteCode?: string;
   hideOptions?: boolean;
 }
 
@@ -40,7 +39,6 @@ const FileViewer: React.FC<Props> = ({
 }) => {
   const { startTopLoader, stopTopLoader } = useLoaderStore();
   const { files, addDataToStore } = useDataStore();
-  const { onChangeDrawer } = useDrawerStore();
 
   const onClickStar = async (id: number, isStared: boolean) => {
     try {
@@ -64,10 +62,6 @@ const FileViewer: React.FC<Props> = ({
     } finally {
       stopTopLoader();
     }
-  };
-
-  const onClickInfo = () => {
-    onChangeDrawer(id, name, url, stared, fileInviteCode);
   };
 
   const getPreivewMedia = () => {
@@ -115,7 +109,7 @@ const FileViewer: React.FC<Props> = ({
             {name}
           </h1>
 
-          {!hideOptions && (
+          {!hideOptions && id && (
             <div className="absolute right-0">
               <Options
                 name={name}
@@ -124,7 +118,6 @@ const FileViewer: React.FC<Props> = ({
                 isFileStared={stared}
                 onClickStar={onClickStar}
                 fileInviteCode={fileInviteCode}
-                onClickInfo={onClickInfo}
               />
             </div>
           )}
@@ -157,7 +150,7 @@ const FileViewer: React.FC<Props> = ({
           </h1>
         </div>
 
-        {!hideOptions && (
+        {!hideOptions && id && (
           <div onClick={(e) => e.stopPropagation()} className="">
             <Options
               name={name}
@@ -166,7 +159,6 @@ const FileViewer: React.FC<Props> = ({
               isFileStared={stared}
               onClickStar={onClickStar}
               fileInviteCode={fileInviteCode}
-              onClickInfo={onClickInfo}
             />
           </div>
         )}
