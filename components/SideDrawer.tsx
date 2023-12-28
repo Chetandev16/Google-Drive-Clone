@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import qs from "query-string";
 import {
   Sheet,
   SheetContent,
@@ -10,7 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Info } from "lucide-react";
 import File from "@/components/File";
 import axios from "axios";
@@ -44,11 +42,7 @@ const SideDrawer: React.FC<Props> = ({ fileId }) => {
 
   useEffect(() => {
     const getFileDetails = async () => {
-      const url = qs.stringifyUrl({
-        url: "/api/file/detail",
-        query: { fileId },
-      });
-      const res = await axios.get(url);
+      const res = await axios.get(`/api/file/get-details/${fileId}`);
 
       setDrawerData(res.data);
       setIsLoading(false);

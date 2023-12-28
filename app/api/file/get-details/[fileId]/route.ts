@@ -2,23 +2,24 @@ import { currentUser } from "@/lib/current-user";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(
+  req: Request,
+  { params }: { params: { fileId: string } }
+) {
   try {
     const user = await currentUser();
+
     if (!user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const fileId = searchParams.get("fileId");
+    const fileId = params.fileId;
 
-    if (!fileId) return new NextResponse("FileId required", { status: 500 });
+    if (!fileId) return new NextResponse("fileId missing", { status: 404 });
 
     const file = await db.file.findUnique({
       where: { id: fileId, userId: user.id },
     });
-
-    if (!file) return new NextResponse("File not found", { status: 404 });
 
     const response = {
       ...file,
@@ -28,7 +29,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json(response);
   } catch (err) {
-    console.log("DRAWER DETAIL ERROR", err);
-    return new NextResponse("Internal Server Error", { status: 404 });
+    return new NextResponse("Internal Server Error");
   }
 }
