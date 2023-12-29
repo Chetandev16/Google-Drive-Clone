@@ -18,13 +18,17 @@ export async function GET(
     if (!fileId) return new NextResponse("fileId missing", { status: 404 });
 
     const file = await db.file.findUnique({
-      where: { id: fileId, userId: user.id },
+      where: { id: fileId },
+    });
+
+    const fileOwner = await db.user.findUnique({
+      where: { id: file?.userId },
     });
 
     const response = {
       ...file,
-      fileOwner: user.name,
-      fileOwnerImage: user.imageUrl,
+      fileOwner: fileOwner?.name,
+      fileOwnerImage: fileOwner?.imageUrl,
     };
 
     return NextResponse.json(response);

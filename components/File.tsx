@@ -141,13 +141,16 @@ const FileViewer: React.FC<Props> = ({
         onClick={() =>
           onOpen("fileViewer", { fileType: "img", fileUrl: url, name: name })
         }
-        className="cursor-pointer flex p-3 hover:bg-[#E1E5EA] mt-2 rounded-sm justify-between items-center gap-3"
+        className="cursor-pointer flex p-3 group-hover:bg-[#E1E5EA] mt-2 rounded-sm justify-between items-center gap-3"
       >
         <div className="flex items-center gap-2">
           {FileIcon[identifyContentType(url)]}
-          <h1 className="text-[#5F6368] text-sm font-medium truncate">
+          <p className="hidden sm:flex text-[#5F6368] text-sm font-medium truncate">
             {name}
-          </h1>
+          </p>
+          <p className="uppercase sm:hidden text-[#5F6368] text-sm font-medium truncate">
+            {identifyContentType(url)}
+          </p>
         </div>
 
         {!hideOptions && id && (

@@ -3,7 +3,6 @@
 import { isEmpty } from "lodash";
 import Breadcrumb from "@/components/Breadcrumb";
 import Navbar from "@/components/DashboardLayout/Navbar";
-import Sidebar from "@/components/DashboardLayout/Sidebar";
 import { Grid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,6 +10,8 @@ import { useEffect } from "react";
 import { useSupabase } from "@/store/use-supabase-store";
 import { useDataStore } from "@/store/use-data-store";
 import { useLayout } from "@/store/use-layout-store";
+import { usePathname } from "next/navigation";
+import SidebarWrapper from "@/components/DashboardLayout/SidebarWrapper";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { layout, onChangeLayout } = useLayout();
@@ -18,6 +19,19 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const supabaseURL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const supabaseKEY = process.env.NEXT_PUBLIC_SUPABASE_KEY || "";
   const { createSupabaseClient, supabase } = useSupabase();
+  const pathName = usePathname();
+
+  const getHeading = () => {
+    if (pathName.includes("/home")) {
+      return "My Drive";
+    } else if (pathName.includes("/shared")) {
+      return "Shared with me";
+    } else if (pathName.includes("/shared")) {
+      return "Recents";
+    }
+
+    return "Stared";
+  };
 
   useEffect(() => {
     if (!supabase) {
@@ -32,12 +46,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
       <div className="w-full h-full">
         <div className="flex w-full h-full">
-          <Sidebar />
+          <SidebarWrapper isMenu={false} />
           <ScrollArea className="w-full !static">
             {!isFetchingData && (
               <div className="flex justify-between p-6">
                 {isEmpty(breadCrumbData) ? (
-                  <h1 className="text-2xl">My Drive</h1>
+                  <h1 className="text-2xl">{getHeading()}</h1>
                 ) : (
                   <Breadcrumb breadcrumb={breadCrumbData} />
                 )}

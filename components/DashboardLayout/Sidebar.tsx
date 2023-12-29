@@ -1,7 +1,7 @@
 "use client";
 
 import { loadStripe } from "@stripe/stripe-js";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -237,7 +237,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-[20%] 2xl:w-[10%] bg-[#F7F9FC] hidden lg:flex flex-col p-2 lg:p-2 xl:p-4">
+    <Fragment>
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -249,7 +249,7 @@ const Sidebar = () => {
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent side="right">
+        <PopoverContent className="w-[180%]" side="bottom">
           <div>
             <div>
               <p
@@ -361,7 +361,7 @@ const Sidebar = () => {
           </Button>
         )}
       </div>
-    </div>
+    </Fragment>
   );
 };
 

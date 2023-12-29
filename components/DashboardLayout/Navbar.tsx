@@ -11,6 +11,9 @@ import { Menu, Search } from "lucide-react";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
 
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import SidebarWrapper from "@/components/DashboardLayout/SidebarWrapper";
+
 type LoadingBarType = any;
 
 const Navbar = () => {
@@ -29,7 +32,15 @@ const Navbar = () => {
       <LoadingBar color="#ff7c05" ref={ref} />
       <div className="w-full bg-[#F7F9FC] p-4 flex justify-between items-center">
         <div className="flex justify-start items-center gap-2">
-          <Menu className="text-slate-600/80 lg:hidden" />
+          <Sheet>
+            <SheetTrigger>
+              <Menu className="text-slate-600/80 lg:hidden" />
+            </SheetTrigger>
+
+            <SheetContent side={"left"}>
+              <SidebarWrapper isMenu />
+            </SheetContent>
+          </Sheet>
           <Image src={logo} alt="logo" className="h-6 sm:h-9 w-6 sm:w-9" />
           <h1 className="hidden sm:block text-lg sm:text-xl font-semibold text-slate-700/80">
             Drive
