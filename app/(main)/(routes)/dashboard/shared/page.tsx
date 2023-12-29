@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import qs from "query-string";
 import React, { useEffect } from "react";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
@@ -15,20 +16,28 @@ const Shared = () => {
 
   const {
     files,
-    folders,
     isFetchingData,
     toggleFetchingData,
     resetData,
     addDataToStore,
     refetchData,
+    searchKeyword,
   } = useDataStore();
 
   const { layout } = useLayout();
 
   useEffect(() => {
-    const getSharedFiles = async () => {
+    const getSharedFiles = async (search: string) => {
       startTopLoader();
-      const response = await axios.get("/api/file/shared");
+
+      const url = qs.stringifyUrl({
+        url: "/api/file/shared",
+        query: {
+          search,
+        },
+      });
+
+      const response = await axios.get(url);
 
       if (response.status == 200) {
         const { data } = response;
@@ -38,13 +47,18 @@ const Shared = () => {
       toggleFetchingData(false);
       stopTopLoader();
     };
-    getSharedFiles();
+
+    const delayTimer = setTimeout(() => {
+      getSharedFiles(searchKeyword);
+    }, 1000);
 
     return () => {
+      clearTimeout(delayTimer);
       toggleFetchingData(true);
       resetData();
     };
   }, [
+    searchKeyword,
     refetchData,
     addDataToStore,
     resetData,
@@ -57,11 +71,11 @@ const Shared = () => {
     return <Loadar />;
   }
 
-  if (isEmpty(files) && isEmpty(folders)) {
+  if (isEmpty(files)) {
     return <Nodata />;
   }
 
-  return <RenderData folders={folders} files={files} layout={layout} />;
+  return <RenderData folders={[]} files={files} layout={layout} />;
 };
 
 export default Shared;

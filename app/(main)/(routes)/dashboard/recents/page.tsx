@@ -9,58 +9,76 @@ import Loadar from "@/components/Loadar";
 import Nodata from "@/components/Nodata";
 import RenderData from "@/components/DashboardLayout/RenderData";
 import { isEmpty } from "lodash";
+import qs from "query-string";
 
 const Recents = () => {
   const { startTopLoader, stopTopLoader } = useLoaderStore();
 
   const {
     files,
-    folders,
     isFetchingData,
     toggleFetchingData,
     resetData,
     addDataToStore,
     refetchData,
+    searchKeyword,
   } = useDataStore();
   const { layout } = useLayout();
 
-  useEffect(() => {
-    const getSharedFiles = async () => {
-      startTopLoader();
-      const response = await axios.get("/api/file/get-recents");
+  useEffect(
+    () => {
+      const getRecentsFiles = async (searchKeyword: string) => {
+        startTopLoader();
 
-      if (response.status == 200) {
-        const { data } = response;
-        addDataToStore(data.files, data.folders, data.userAccountInfo);
-      }
+        const url = qs.stringifyUrl({
+          url: "/api/file/get-recents",
+          query: {
+            search: searchKeyword,
+          },
+        });
 
-      toggleFetchingData(false);
-      stopTopLoader();
-    };
-    getSharedFiles();
+        const response = await axios.get(url);
 
-    return () => {
-      toggleFetchingData(true);
-      resetData();
-    };
-  }, [
-    refetchData,
-    addDataToStore,
-    resetData,
-    startTopLoader,
-    stopTopLoader,
-    toggleFetchingData,
-  ]);
+        if (response.status == 200) {
+          const { data } = response;
+          addDataToStore(data.files, data.folders, data.userAccountInfo);
+        }
+
+        toggleFetchingData(false);
+        stopTopLoader();
+      };
+
+      const delayTimer = setTimeout(() => {
+        getRecentsFiles(searchKeyword);
+      }, 1000);
+
+      return () => {
+        toggleFetchingData(true);
+        clearTimeout(delayTimer);
+        resetData();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      searchKeyword,
+      refetchData,
+      addDataToStore,
+      resetData,
+      startTopLoader,
+      stopTopLoader,
+      toggleFetchingData,
+    ]
+  );
 
   if (isFetchingData) {
     return <Loadar />;
   }
 
-  if (isEmpty(files) && isEmpty(folders)) {
+  if (isEmpty(files)) {
     return <Nodata />;
   }
 
-  return <RenderData folders={folders} files={files} layout={layout} />;
+  return <RenderData folders={[]} files={files} layout={layout} />;
 };
 
 export default Recents;

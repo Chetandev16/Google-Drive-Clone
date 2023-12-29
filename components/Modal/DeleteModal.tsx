@@ -36,6 +36,13 @@ export const DeleteModal = () => {
 
   const isModalOpen = isOpen && type === "delete";
 
+  const getUserData = async () => {
+    const userInfoResponse = await axios.get("/api/get-user-account-info");
+    const userInfo = userInfoResponse.data.userAccountInfo;
+
+    return userInfo;
+  };
+
   const deleteContent = async () => {
     try {
       startTopLoader();
@@ -61,7 +68,9 @@ export const DeleteModal = () => {
         (folder) => folder.id !== folder_id
       );
 
-      addDataToStore(files, updatedFolders);
+      const userInfo = await getUserData();
+
+      addDataToStore(files, updatedFolders, userInfo);
 
       toast.success(`${deleteType} deleted successfully`);
       onClose();
@@ -90,8 +99,9 @@ export const DeleteModal = () => {
       const { file_id } = res.data;
 
       const updatedFiles = filter(files, (file) => file.id !== file_id);
+      const userInfo = await getUserData();
 
-      addDataToStore(updatedFiles, folders);
+      addDataToStore(updatedFiles, folders, userInfo);
 
       return new Promise((resolve) => {
         resolve("done");

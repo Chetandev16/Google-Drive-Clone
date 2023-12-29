@@ -64,10 +64,13 @@ const NewFolderModal = () => {
         parentId,
       });
 
+      const userInfoResponse = await axios.get("/api/get-user-account-info");
+      const userInfo = userInfoResponse.data.userAccountInfo;
+
       const { folder } = res.data;
       const upddatedFolder = folders;
       upddatedFolder.push(folder);
-      addDataToStore(files, folders);
+      addDataToStore(files, folders, userInfo);
 
       toast.success(`Folder created: ${value.name}`);
       form.reset();

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { isEmpty } from "lodash";
 import { useDataStore } from "@/store/use-data-store";
 import { useLoaderStore } from "@/store/use-loader-store";
@@ -25,7 +25,9 @@ const FolderPage: React.FC<Props> = ({ params }) => {
     files,
     folders,
     refetchData,
+    searchKeyword,
   } = useDataStore();
+
   const { startTopLoader, stopTopLoader } = useLoaderStore();
   const { layout } = useLayout();
 
@@ -53,10 +55,18 @@ const FolderPage: React.FC<Props> = ({ params }) => {
       }
     };
 
-    const getData = async () => {
+    const getData = async (search: string, folderId: string) => {
       toggleFetchingData(true);
       startTopLoader();
-      const response = await axios.get(`/api/get-files-folders/${folderId}`);
+
+      const url = qs.stringifyUrl({
+        url: `/api/get-files-folders/${folderId}/`,
+        query: {
+          search,
+        },
+      });
+
+      const response = await axios.get(url);
 
       if (response.status == 200) {
         const { data } = response;
@@ -66,13 +76,17 @@ const FolderPage: React.FC<Props> = ({ params }) => {
       getBreadCrumbData();
     };
 
-    getData();
+    const delayTimer = setTimeout(() => {
+      getData(searchKeyword, folderId);
+    }, 1000);
 
     return () => {
+      clearTimeout(delayTimer);
       toggleFetchingData(true);
       setBreadCrumbData([]);
     };
   }, [
+    searchKeyword,
     addDataToStore,
     params,
     setBreadCrumbData,

@@ -14,6 +14,10 @@ export async function GET(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+
+    const searchTerm = searchParams.get("search") || "";
+
     const folderId = params.folderId == "root" ? currUser.id : params.folderId;
 
     if (!folderId) {
@@ -24,13 +28,24 @@ export async function GET(
       where: { id: currUser.id },
       include: {
         files: {
-          where: { folderId },
+          where: {
+            folderId,
+            name: {
+              contains: searchTerm,
+            },
+          },
           orderBy: {
             createdAt: "asc",
           },
         },
         folders: {
-          where: { parentId: folderId, userId: currUser.id },
+          where: {
+            parentId: folderId,
+            userId: currUser.id,
+            name: {
+              contains: searchTerm,
+            },
+          },
           orderBy: {
             createdAt: "asc",
           },

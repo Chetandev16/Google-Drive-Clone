@@ -8,11 +8,16 @@ export async function GET(req: Request) {
     const user = await currentUser();
 
     if (!user) return new NextResponse("Unauthorized", { status: 401 });
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || "";
 
     const files = await db.file.findMany({
       where: {
         sharedWith: {
           has: user.id,
+        },
+        name: {
+          contains: search,
         },
       },
     });

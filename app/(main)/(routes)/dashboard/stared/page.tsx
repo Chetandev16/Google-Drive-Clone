@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import qs from "query-string";
 import React, { useEffect } from "react";
 import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
@@ -15,19 +16,27 @@ const Stared = () => {
 
   const {
     files,
-    folders,
     isFetchingData,
     toggleFetchingData,
     resetData,
     addDataToStore,
     refetchData,
+    searchKeyword,
   } = useDataStore();
   const { layout } = useLayout();
 
   useEffect(() => {
-    const getSharedFiles = async () => {
+    const getStaredFiles = async (search: string) => {
       startTopLoader();
-      const response = await axios.get("/api/file/star/get-files");
+
+      const url = qs.stringifyUrl({
+        url: "/api/file/star/get-files",
+        query: {
+          search,
+        },
+      });
+
+      const response = await axios.get(url);
 
       if (response.status == 200) {
         const { data } = response;
@@ -37,9 +46,13 @@ const Stared = () => {
       toggleFetchingData(false);
       stopTopLoader();
     };
-    getSharedFiles();
+
+    const delayTimer = setTimeout(() => {
+      getStaredFiles(searchKeyword);
+    }, 1000);
 
     return () => {
+      clearTimeout(delayTimer);
       toggleFetchingData(true);
       resetData();
     };
@@ -50,19 +63,18 @@ const Stared = () => {
     startTopLoader,
     stopTopLoader,
     toggleFetchingData,
+    searchKeyword,
   ]);
 
   if (isFetchingData) {
     return <Loadar />;
   }
 
-  if (isEmpty(files) && isEmpty(folders)) {
+  if (isEmpty(files)) {
     return <Nodata />;
   }
 
-  return (
-    <RenderData isStaredTab folders={folders} files={files} layout={layout} />
-  );
+  return <RenderData isStaredTab folders={[]} files={files} layout={layout} />;
 };
 
 export default Stared;

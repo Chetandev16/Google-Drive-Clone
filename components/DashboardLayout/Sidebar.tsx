@@ -149,7 +149,10 @@ const Sidebar = () => {
         const updatedFiles = [...files];
         updatedFiles.push(file);
 
-        addDataToStore(updatedFiles);
+        const userInfoResponse = await axios.get("/api/get-user-account-info");
+        const userInfo = userInfoResponse.data.userAccountInfo;
+
+        addDataToStore(updatedFiles, undefined, userInfo);
 
         return new Promise((resolve) => {
           resolve("done");

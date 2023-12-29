@@ -36,18 +36,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    const getUserAccountInfo = async () => {
-      try {
-        const res = await axios.get("/api/get-user-account-info");
-        addDataToStore(undefined, undefined, res.data.userAccountInfo);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    getUserAccountInfo();
-  }, [addDataToStore, files, folders]);
-
-  useEffect(() => {
     if (!supabase) {
       createSupabaseClient(supabaseURL, supabaseKEY);
     }
