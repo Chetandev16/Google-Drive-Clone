@@ -12,10 +12,12 @@ import { useDataStore } from "@/store/use-data-store";
 import { useLayout } from "@/store/use-layout-store";
 import { usePathname } from "next/navigation";
 import SidebarWrapper from "@/components/DashboardLayout/SidebarWrapper";
+import axios from "axios";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { layout, onChangeLayout } = useLayout();
-  const { breadCrumbData, isFetchingData } = useDataStore();
+  const { breadCrumbData, isFetchingData, files, folders, addDataToStore } =
+    useDataStore();
   const supabaseURL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const supabaseKEY = process.env.NEXT_PUBLIC_SUPABASE_KEY || "";
   const { createSupabaseClient, supabase } = useSupabase();
@@ -32,6 +34,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
     return "Stared";
   };
+
+  useEffect(() => {
+    const getUserAccountInfo = async () => {
+      try {
+        const res = await axios.get("/api/get-user-account-info");
+        addDataToStore(undefined, undefined, res.data.userAccountInfo);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getUserAccountInfo();
+  }, [addDataToStore, files, folders]);
 
   useEffect(() => {
     if (!supabase) {
