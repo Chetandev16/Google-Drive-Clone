@@ -10,7 +10,7 @@ import { useLoaderStore } from "@/store/use-loader-store";
 import { useDataStore } from "@/store/use-data-store";
 import { Play } from "lucide-react";
 import axios from "axios";
-import { forEach } from "lodash";
+import { filter, forEach, map } from "lodash";
 
 interface Props {
   id?: number;
@@ -20,6 +20,9 @@ interface Props {
   stared?: boolean;
   fileInviteCode?: string;
   hideOptions?: boolean;
+  isStaredTab?: boolean;
+  hideDelete?: boolean;
+  hideShare?: boolean;
 }
 
 const FileIcon = {
@@ -36,6 +39,9 @@ const FileViewer: React.FC<Props> = ({
   layout,
   fileInviteCode,
   hideOptions = false,
+  isStaredTab = false,
+  hideDelete = false,
+  hideShare = false,
 }) => {
   const { startTopLoader, stopTopLoader } = useLoaderStore();
   const { files, addDataToStore } = useDataStore();
@@ -51,11 +57,19 @@ const FileViewer: React.FC<Props> = ({
 
       const { file_id, file_stared } = res.data;
 
-      const updatesFiles = forEach(files, (file) => {
-        if (file.id === file_id) {
-          file.stared = file_stared;
-        }
-      });
+      let updatesFiles = undefined;
+
+      if (isStaredTab) {
+        updatesFiles = filter(files, (file) => file.id != file_id);
+      } else {
+        updatesFiles = map(files, (file) => {
+          if (file.id == file_id) {
+            file.stared = file_stared;
+          }
+
+          return file;
+        });
+      }
 
       addDataToStore(updatesFiles);
     } catch (e) {
@@ -118,6 +132,8 @@ const FileViewer: React.FC<Props> = ({
                 isFileStared={stared}
                 onClickStar={onClickStar}
                 fileInviteCode={fileInviteCode}
+                hideDelete={hideDelete}
+                hideShare={hideShare}
               />
             </div>
           )}
@@ -162,6 +178,8 @@ const FileViewer: React.FC<Props> = ({
               isFileStared={stared}
               onClickStar={onClickStar}
               fileInviteCode={fileInviteCode}
+              hideDelete={hideDelete}
+              hideShare={hideShare}
             />
           </div>
         )}

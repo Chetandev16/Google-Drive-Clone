@@ -2,6 +2,7 @@
 
 import { isEmpty, map } from "lodash";
 import FileViewer from "@/components/File";
+import { useDataStore } from "@/store/use-data-store";
 import Folder from "@/components/Folder";
 import { cn } from "@/lib/utils";
 
@@ -9,9 +10,17 @@ interface Props {
   folders: any;
   files: any;
   layout: string;
+  isStaredTab?: boolean;
 }
 
-const RenderData: React.FC<Props> = ({ folders, files, layout }) => {
+const RenderData: React.FC<Props> = ({
+  folders,
+  files,
+  layout,
+  isStaredTab,
+}) => {
+  const { userAccountInfo } = useDataStore();
+
   const getClassNames = () => {
     if (layout == "grid") {
       return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6";
@@ -58,6 +67,9 @@ const RenderData: React.FC<Props> = ({ folders, files, layout }) => {
                   layout={layout}
                   stared={file.stared}
                   fileInviteCode={file.inviteCode}
+                  isStaredTab={isStaredTab}
+                  hideDelete={userAccountInfo.user_id !== file.userId}
+                  hideShare={userAccountInfo.user_id !== file.userId}
                 />
               </div>
             );

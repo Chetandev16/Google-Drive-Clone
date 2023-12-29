@@ -49,6 +49,7 @@ export async function GET(
     if (user) {
       userAccountInfo = {
         tier: user.tier,
+        user_id: user.id,
         email: user.email,
         filesUploaded: parseInt(user.free_tier_files_uploaded),
         foldersCreated: parseInt(user.free_tier_folders_created),

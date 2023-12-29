@@ -20,6 +20,8 @@ interface Props {
   onClickStar?: (id: number, isStared: boolean) => void;
   isFileStared?: boolean;
   fileInviteCode?: string;
+  hideDelete?: boolean;
+  hideShare?: boolean;
 }
 
 const Options: React.FC<Props> = ({
@@ -30,6 +32,8 @@ const Options: React.FC<Props> = ({
   onClickStar,
   isFileStared,
   fileInviteCode,
+  hideDelete,
+  hideShare,
 }) => {
   const { onOpen } = useModal();
   return (
@@ -47,7 +51,7 @@ const Options: React.FC<Props> = ({
               <SideDrawer fileId={id} />
             </div>
           )}
-          {type === "File" && (
+          {type === "File" && !hideShare && (
             <div>
               <p
                 onClick={() =>
@@ -91,15 +95,17 @@ const Options: React.FC<Props> = ({
               </p>
             </div>
           )}
-          <div>
-            <p
-              onClick={() => onOpen("delete", { id, name, deleteType: type })}
-              className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"
-            >
-              <Trash className="h-4 w-4 text-slate-600" />
-              Delete
-            </p>
-          </div>
+          {!hideDelete && (
+            <div>
+              <p
+                onClick={() => onOpen("delete", { id, name, deleteType: type })}
+                className="cursor-pointer flex gap-1 items-center hover:bg-slate-200 p-2 pl-4 text-sm rounded-md"
+              >
+                <Trash className="h-4 w-4 text-slate-600" />
+                Delete
+              </p>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>

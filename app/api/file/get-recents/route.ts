@@ -11,9 +11,17 @@ export async function GET(req: Request) {
 
     const files = await db.file.findMany({
       where: {
-        sharedWith: {
-          has: user.id,
-        },
+        OR: [
+          { userId: user.id },
+          {
+            sharedWith: {
+              has: user.id,
+            },
+          },
+        ],
+      },
+      orderBy: {
+        updatedAt: "desc",
       },
     });
 
@@ -53,7 +61,7 @@ export async function GET(req: Request) {
       userAccountInfo,
     });
   } catch (err) {
-    console.log("GET_SHARED_FILES", err);
+    console.log("RECENT_FILE_ERROR", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

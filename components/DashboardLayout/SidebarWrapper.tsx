@@ -11,7 +11,7 @@ const SidebarWrapper: React.FC<Props> = ({ isMenu }) => {
     return <Sidebar />;
   }
   return (
-    <div className="w-[20%] 2xl:w-[10%] bg-[#F7F9FC] hidden lg:flex flex-col p-2 lg:p-2 xl:p-4">
+    <div className="w-[20%] 2xl:w-[20%] 3xl:w-[10%] bg-[#F7F9FC] hidden lg:flex flex-col p-2 lg:p-2 xl:p-4">
       <Sidebar />
     </div>
   );

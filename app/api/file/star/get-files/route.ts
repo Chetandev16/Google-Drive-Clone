@@ -11,7 +11,7 @@ export async function GET(req: Request) {
 
     const files = await db.file.findMany({
       where: {
-        sharedWith: {
+        startedBy: {
           has: user.id,
         },
       },
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
       userAccountInfo,
     });
   } catch (err) {
-    console.log("GET_SHARED_FILES", err);
+    console.log("STAR_FILES_GET", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

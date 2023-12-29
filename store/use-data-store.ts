@@ -7,6 +7,7 @@ type UserAccountInfo = {
   foldersCreated: number;
   totalFilesLimit: number;
   totalFoldersLimit: number;
+  user_id: string;
 };
 
 interface DataState {
@@ -39,6 +40,7 @@ export const useDataStore = create<DataState>((set) => ({
     foldersCreated: 0,
     totalFilesLimit: 5,
     totalFoldersLimit: 5,
+    user_id: "",
   },
   isFetchingData: true,
   searchKeyword: "",
