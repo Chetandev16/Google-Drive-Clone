@@ -28,8 +28,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       return "My Drive";
     } else if (pathName.includes("/shared")) {
       return "Shared with me";
-    } else if (pathName.includes("/shared")) {
-      return "Recents";
+    } else if (pathName.includes("/recents")) {
+      return "Recent files";
     }
 
     return "Stared";
